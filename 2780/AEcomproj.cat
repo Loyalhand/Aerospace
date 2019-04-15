@@ -1,0 +1,16 @@
+ vehimaxcle 
+global consts
+prop
+speed in ft/s
+fuselage
+ functions
+figures
+thrust
+ power
+ hodograph
+ runge-kutta
+drag v position
+ notable values
+ take off velocity: 47.9 ft/s
+ take off distance: 54.9 ft/s
+ theta max = 0.6886 rad
