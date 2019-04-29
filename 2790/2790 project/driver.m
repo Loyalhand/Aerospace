@@ -28,7 +28,67 @@ load('measurements.mat','zk') % [measurement x time] -> [1x31]  [m]
 
 
 %% Polynomial fit
+x = T';
+y = zk';
 
+figure
+ax = axes;
+scatter(x,y)
+hold on
+
+for k = 1:5
+    for n=1:length(x)
+        V(n,1) = 1;
+        V(n,k+1) = (x(n))^k;
+    end
+    a = (inv(V'*V))*(V')*y;
+    if k<5 
+        a(k+2:6)=0;
+    end
+    
+    p = 0;
+    for j = 0:5
+        p = p + a(j+1)*x.^(j);
+    end
+    plot(x,p)
+    
+end
+
+title('Position vs Time');
+xlabel('Time (s)');
+ylabel('Position (m)');
+legend ('points','1st','2nd','3rd','4th','5th','Location', 'NorthEast');
+hold off
+
+i = T';
+b = zk';
+figure
+scatter(i,b)
+hold on
+
+for k = 1:5
+    for n=1:length(i)
+        VN(n,1) = 1;
+        VN(n,k+1) = (i(n))^k;
+    end
+    a = (inv(VN'*VN))*(VN')*b;
+    if k<5 
+        a(k+2:6)=0;
+    end
+    
+    p = 0;
+    for j = 0:5
+        p = p + a(j+1)*i.^(j);
+    end
+    plot(i,p)
+end
+
+xlim([14,15]);
+title('Position vs Time');
+xlabel('Time (s)');
+ylabel('Position (m)');
+legend ('points','1st','2nd','3rd','4th','5th','Location', 'NorthEast');
+hold off
 
 
 %% Kalman filter

@@ -27,7 +27,7 @@ function [mkm,Pkm] = kf_prop(mkm1,Pkm1,F,Q,M)
 %%%%
 
     % Mean
-
+    mkm = F*mkm1;
     % Covariance
-
+    Pkm = F*Pkm1*F'+M*Q*M';
 end

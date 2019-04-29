@@ -26,4 +26,4 @@ Lk = eye(1);
 
 
 % Measurement noise variance
-Rk = 200; %  [m^2]
+Rk = 20; %  [m^2]

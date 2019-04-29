@@ -3,20 +3,20 @@ clear all
 close all
 
 % vehimaxcle 
-wt = 14;
-wingspan = 110/12; %ft
-wingcord = 13.8/12; %ft
-liftslopeAF = .115;
-liftslopeFW = .084;
-CL = 1.4; 
+wt = 15.34268538/16;
+wingspan = 59.245/12; %ft
+wingcord = 9.115/12; %ft
+liftslopeAF = .1;
+liftslopeFW = 0.079395;
+CL = .98; 
 Mr = .05;
-cdo = .012;
-ZLiftAoA = -4.0;
-ag = 2.0;
-wingHeight = 1; %ft
+cdo = .0155;
+ZLiftAoA = -6.3;
+ag = 11.5;
+wingHeight = 1/3; %ft
 ar = wingspan/wingcord;
 s = wingspan*wingcord
-
+m =  0.4429;
 
 %global consts
 rho = .0023;
@@ -25,29 +25,31 @@ gravity = 32.2;
 
 %prop
 %speed in ft/s
-c_0 = 10.79;
-c_1 = .00489;
-c_2 = -.00065;
+c_0 = .5617;
+c_1 = -.0054;
+c_2 = -4*10^-5;
 T = @(V) c_0 + c_1*V + c_2*V^2;
 
 %fuselage
-d_0 = -.0002;
-d_1 = .00036;
+d_0 = .00016;
+d_1 = .0001;
 D_ft = @(V) d_0*V + d_1*V^2; %lbf
 
-
- % functions
+% functions
 phi = (16*wingHeight/wingspan)^2/(1+(16*wingHeight/wingspan)^2);
 q=  1/2*rho
 maxcl = @(a) liftslopeFW*(a-ZLiftAoA);
 stall = sqrt(2*wt/(rho*s*CL))
 Lift = @(V,a) 1/2*rho*V^2*wingspan*wingcord*maxcl(a);
-
 e = (57.3*liftslopeAF)/(((liftslopeAF/liftslopeFW)-1)*pi*ar);
-
 cd = @(a) cdo + phi*maxcl(a)^2/pi/e/(wingspan^2/wingcord);
-
 Drag = @(V,a) D_ft(V)/2*rho*V^2*cd(a);
+Tr = @(V)q*s*cdo*V^2+ wt^2/(q*s*pi*e*ar*V^2) + D_ft(V);
+Pr = @(V)Tr(V)*V;
+Pa = @(V) T(V)*V;
+rc = @(V) (Pa(V)-Pr(V))/wt;
+hv = @(V) sqrt(V^2-rc(V)^2);
+g = @(V) m*(V);
 
 
 t0= 0;
@@ -74,10 +76,9 @@ end
 %thrust
 f1 = figure();
 hold on
-Tr = @(V)q*s*cdo*V^2+ wt^2/(q*s*pi*e*ar*V^2) + D_ft(V);
-fplot(Tr, [stall 110],'--');
-ylim ([0 15]);
-fplot (T, [stall 110]);
+fplot(Tr, [stall 50],'--');
+ylim ([0 .6]);
+fplot (T, [stall 50]);
 title('Thrust vs velocity');
 legend ('thrust required','thrust availble','Location', 'NorthEast');
 xlabel('velocity (ft/s)','FontName','Times New Roman','FontSize',12);
@@ -88,11 +89,9 @@ saveas(f1,'Thrust vs velocity','pdf');
 % power
 f2 = figure();
 hold on
-Pr = @(V)Tr(V)*V;
-fplot(Pr, [stall 150],'--');
-ylim ([0 700]);
-Pa = @(V) T(V)*V;
-fplot (Pa, [stall 150]);
+fplot(Pr, [stall 60],'--');
+ylim ([0 12]);
+fplot (Pa, [stall 60]);
 title('Power vs velocity');
 legend ('power required','power availble','Location', 'NorthEast');
 xlabel('velocity (ft/s)','FontName','Times New Roman','FontSize',12);
@@ -103,17 +102,13 @@ saveas(f2,'power vs velocity','pdf');
 % hodograph
 f3 = figure();
 hold on
-ylim ([0 35]);
-xlim ([0 100]);
-rc = @(V) (Pa(V)-Pr(V))/wt;
-hv = @(V) sqrt(V^2-rc(V)^2);
+ylim ([0 10]);
+xlim ([0 50]);
 fplot (hv,rc, [stall 130]);
-m =  0.8214;
-g = @(V) m*(V);
+
 fplot(g, [0 60]);
 for i=2:130                     % forloop to find theta max
     Theta(i) = asin(rc(i)/i);
-    disp(Theta(i))
     if Theta(i)>Theta(i-1)
        Theta_max = Theta(i);
     end
@@ -128,10 +123,10 @@ saveas(f3,'hodograph','pdf');
 % runge-kutta
 f4 = figure();
 hold on
-ylim ([0 3]);
-xlim ([0 60]);
-plot (vspace, tspace,'--');
-plot (xspace,tspace)
+ylim ([0 16]);
+xlim ([0 1]);
+plot (tspace, vspace,'--');
+plot (tspace,xspace)
 title('velovity vs time');
 xlabel('time (s)','FontName','Times New Roman','FontSize',12);
 ylabel('velocity/position (ft/s and ft)','FontName','Times New Roman','FontSize',12);
@@ -142,8 +137,8 @@ saveas(f4,'velocity vs time','pdf');
 %drag v position
 f5 = figure();
 hold on
-ylim ([0 20]);
-xlim ([0 60]);
+ylim ([0 .7]);
+xlim ([0 5]);
 fplot (D_ft, [0 xspace(n1)],'--');
 fplot (T, [0 xspace(n1)]);
 title('Drag vs position');
@@ -153,7 +148,13 @@ ylabel('drag/thrust (lb)','FontName','Times New Roman','FontSize',12)
 hold off
 saveas(f5,'Drag vs position','pdf');
 
-% notable values
-% take off velocity: 47.9 ft/s
-% take off distance: 54.9 ft/s
-% theta max = 0.6886 rad
+%outputs
+disp('Deliverables: Part 1')
+take_off_distance=xspace(end);
+fprintf('The take off distance is %f feet.\n',take_off_distance)
+fprintf('\n')
+disp('Deliverables: Part 2')
+distance_clear=35/tan(Theta_max)+take_off_distance;
+fprintf('The clearing distance is %f feet.\n',distance_clear)
+fprintf('\n')
+disp(Theta_max*180/pi)  % in rad

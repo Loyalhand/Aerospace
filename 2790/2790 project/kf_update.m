@@ -29,16 +29,16 @@ function [mkp,Pkp] = kf_update(mkm,Pkm,zk,Hk,Rk,Lk)
 %%%%
 
     % Measurement estimate
-
+    ek = Hk*mkm;
     % Innovation covariance
-
+    Wk = Hk*Pkm*Hk'+Lk+Rk+Lk';
     % Cross covariance
-
+    Ck= Pkm*Hk';
     % Kalman gain
-
+    Kk = Pkm*Hk'/Wk;
     % Mean update
-
+    mkp = mkm+Kk*(zk-ek);
     % Covariance update
-
+    Pkp = Pkm-Ck*Kk'-Kk*Ck'+Kk*Wk*Kk';
     
 end
